@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdint.h>
 #include <time.h>
+#include <stdbool.h>
 
 typedef enum {
     JANUARY,
@@ -65,9 +66,8 @@ Today get_today() {
     return return_day;
 }
 
-// it's cursed ngl
-void render_months() {
-    char months[12][10] = {
+
+char months[12][10] = {
         "JANUARY",
         "FEBRUARY",
         "MARCH",
@@ -80,12 +80,36 @@ void render_months() {
         "OCTOBER",
         "NOVEMBER",
         "DECEMBER"
-    };
-    // holy loops
-    // TODO: make function for loop in switch
+};
+
+
+void render_month(int days, int counter, int month) {
+    printf("%s\n", months[month]);
+    printf("MN TS WD TH FR ST SN\n");
+
+    for (int j = 1; j <= days; j++) {
+        if ((counter % 7) == 0) {
+            printf("%-3d\n", j);                
+        } else if (j == days) {
+            printf("%-3d\n", j);
+        } else {
+            printf("%-3d", j);
+        }
+        counter++;
+    }
+    printf("\n");
+}
+
+
+void render_months(Today today) {
+    bool IsLeapYear;
+    if (today.year % 4 == 0) {
+        IsLeapYear = true;
+    } else {
+        IsLeapYear = false;
+    } 
+
     for (int i = 0; i < 12; i++) {
-        printf("%s\n", months[i]);
-        printf("MN TS WD TH FR ST SN\n");
         int counter = 1;
         switch((Months)i) {
             case JANUARY:
@@ -95,64 +119,36 @@ void render_months() {
             case AUGUST:
             case OCTOBER:
             case DECEMBER:
-                for (int j = 1; j <= 31; j++) {
-                    if ((counter % 7) == 0) {
-                        printf("%-3d\n", j);
-                        
-                    } else if (j == 31) {
-                        printf("%-3d\n", j);
-                    } else {
-                        printf("%-3d", j);
-                    }
-                    counter++;
-                }
+                render_month(31, counter, i);
                 break;
-
             case APRIL:
             case JUNE:
             case SEPTEMBER:
             case NOVEMBER:
-                for (int j = 1; j <= 30; j++) {
-                    if ((counter % 7) == 0) {
-                        printf("%-3d\n", j);
-
-                    }  else if (j == 30) {
-                        printf("%-3d\n", j);
-                    } else {
-                        printf("%-3d", j);
-                    }
-                    counter++;
-                }
+                render_month(30, counter, i);
                 break;
-
             case FEBRUARY:
-                for (int j = 1; j <= 28; j++) {
-                    if ((counter % 7) == 0) {
-                        printf("%-3d\n", j);
-
-                    }  else if (j == 28) {
-                        printf("%-3d\n", j);
-                    } else {
-                        printf("%-3d", j);
-                    }
-                    counter++;
-                }
+                if (IsLeapYear) {
+                render_month(29, counter, i);
                 break;
-            
+                } else {
+                render_month(28, counter, i);
+                break;
+                }
             default:
-                printf("ERROR");
+                printf("ERROR"); // idk how you can get error lol
                 break;
         }
-        printf("\n");
     }
 }
+
 
 
 
 int main() {
 
     Today myday = get_today();
-    render_months();
+    render_months(myday);
     printf("TODAY:\n");
     printf("Day of month: %d. Year: %d\n", myday.day, myday.year);
     return 0;  
