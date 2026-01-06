@@ -82,22 +82,44 @@ char months[12][10] = {
         "DECEMBER"
 };
 
+void render_number(int counter, int j, int days){
+    if ((counter % 7) == 0 || j == days) {
+        printf("%-3d\n", j);
+    } else {
+        printf("%-3d", j);
+    }
+}
 
-void render_month(int days, int counter, int month) {
-    printf("%s\n", months[month]);
-    printf("MN TS WD TH FR ST SN\n");
+void render_colored_number(int counter, int j, int days){
+    if ((counter % 7) == 0 || j == days) {  
+        printf("\033[31m%-3d\033[0m\n", j);
+    } else {
+        printf("\033[31m%-3d\033[0m", j);
+    }
+}
 
+void render_numbers(int days, int counter, int today) {
     for (int j = 1; j <= days; j++) {
-        if ((counter % 7) == 0) {
-            printf("%-3d\n", j);                
-        } else if (j == days) {
-            printf("%-3d\n", j);
+        if (j == today){
+            render_colored_number(counter, j, days);
         } else {
-            printf("%-3d", j);
+            render_number(counter, j, days); 
         }
         counter++;
     }
     printf("\n");
+}
+
+
+void render_month(int days, int counter, int month, Today today) {
+    printf("%s\n", months[month]);
+    printf("MN TS WD TH FR ST SN\n");
+    if (today.month == month) {
+        render_numbers(days, counter, today.day);
+    } else {
+        render_numbers(days, counter, -1);
+    }
+
 }
 
 
@@ -107,7 +129,7 @@ void render_months(Today today) {
         IsLeapYear = true;
     } else {
         IsLeapYear = false;
-    } 
+    }
 
     for (int i = 0; i < 12; i++) {
         int counter = 1;
@@ -119,20 +141,20 @@ void render_months(Today today) {
             case AUGUST:
             case OCTOBER:
             case DECEMBER:
-                render_month(31, counter, i);
+                render_month(31, counter, i, today);
                 break;
             case APRIL:
             case JUNE:
             case SEPTEMBER:
             case NOVEMBER:
-                render_month(30, counter, i);
+                render_month(30, counter, i, today);
                 break;
             case FEBRUARY:
                 if (IsLeapYear) {
-                render_month(29, counter, i);
+                render_month(29, counter, i, today);
                 break;
                 } else {
-                render_month(28, counter, i);
+                render_month(28, counter, i, today);
                 break;
                 }
             default:
@@ -146,10 +168,10 @@ void render_months(Today today) {
 
 
 int main() {
-
     Today myday = get_today();
     render_months(myday);
+
     printf("TODAY:\n");
-    printf("Day of month: %d. Year: %d\n", myday.day, myday.year);
+    printf("Day of month: %d. Month: %s Year: %d\n", myday.day, months[myday.month], myday.year);
     return 0;  
 }
