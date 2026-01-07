@@ -33,21 +33,8 @@ char months[12][10] = {
         "DECEMBER"
 };
 
-typedef enum {
-    SUNDAY,
-    SATURDAY,
-    FRIDAY,
-    THURSDAY,
-    WEDNESDAY,
-    TUESDAY,
-    MONDAY
-
-} WeekDay;
-
-
 typedef struct {
     int month;
-    WeekDay wday;
     int day;
     int year;
 
@@ -55,7 +42,7 @@ typedef struct {
 
 
 Today get_today() {
-    int m, d, wd, y;
+    int m, d, y;
 
     time_t currTime;
     struct tm *localTime;
@@ -65,13 +52,11 @@ Today get_today() {
     
     m = localTime->tm_mon;
     d = localTime->tm_mday;
-    wd = localTime->tm_wday;
     y = localTime->tm_year + 1900;
 
 
     Today return_day = {
         .month = m,
-        .wday = (WeekDay)wd,
         .day = d,
         .year = y
     };
@@ -93,7 +78,7 @@ int get_first_wday_of_month(int month, int year){
     return time.tm_wday == 0 ? 0 : (7 - time.tm_wday);
 }
 
-// storing wday ints for all months in year
+// storing wdays for all months in year
 int wday_array[12];
 
 int* get_first_wday_of_months(int year){
@@ -203,7 +188,7 @@ void render_months(Today today, int* wday_array) {
 
 
 int main() {
-    Today myday = get_today();
-    int *myday_wdays = get_first_wday_of_months(myday.year);
-    render_months(myday, myday_wdays);
+    Today day = get_today();
+    int *day_wdays = get_first_wday_of_months(day.year);
+    render_months(day, day_wdays);
 }
