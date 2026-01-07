@@ -1,5 +1,4 @@
 #include <stdio.h>
-#include <stdint.h>
 #include <time.h>
 #include <stdbool.h>
 
@@ -19,6 +18,20 @@ typedef enum {
 
 } Months;
 
+char months[12][10] = {
+        "JANUARY",
+        "FEBRUARY",
+        "MARCH",
+        "APRIL",
+        "MAY",
+        "JUNE",
+        "JULY",
+        "AUGUST",
+        "SEPTEMBER",
+        "OCTOBER",
+        "NOVEMBER",
+        "DECEMBER"
+};
 
 typedef enum {
     SUNDAY,
@@ -67,20 +80,30 @@ Today get_today() {
 }
 
 
-char months[12][10] = {
-        "JANUARY",
-        "FEBRUARY",
-        "MARCH",
-        "APRIL",
-        "MAY",
-        "JUNE",
-        "JULY",
-        "AUGUST",
-        "SEPTEMBER",
-        "OCTOBER",
-        "NOVEMBER",
-        "DECEMBER"
-};
+int get_first_wday_of_month(int month, int year){
+    struct tm time = {0};
+
+    time.tm_year = year - 1900;
+    time.tm_mon = month;
+    time.tm_mday = 1;
+
+    mktime(&time);
+
+
+    return time.tm_wday == 0 ? 0 : (7 - time.tm_wday);
+}
+
+// storing wday ints for all months in year
+int wday_array[12];
+
+int* get_first_wday_of_months(int year){
+    for (int i = 0; i < 12; i++){
+        wday_array[i] = get_first_wday_of_month(i, year);
+    }
+
+    return wday_array;
+}
+
 
 void render_number(int counter, int j, int days){
     if ((counter % 7) == 0 || j == days) {
@@ -98,14 +121,24 @@ void render_colored_number(int counter, int j, int days){
     }
 }
 
+void make_indent(int wday){
+    int indent = 6 - wday;
+    char space = ' ';
+    for (int i = 0; i < indent; i++){
+        printf("%-3c", space);
+    }
+}
+
+
 void render_numbers(int days, int counter, int today) {
+    int new_line_counter = 7 - counter;
     for (int j = 1; j <= days; j++) {
         if (j == today){
-            render_colored_number(counter, j, days);
+            render_colored_number(new_line_counter, j, days);
         } else {
-            render_number(counter, j, days); 
+            render_number(new_line_counter, j, days); 
         }
-        counter++;
+        new_line_counter++;
     }
     printf("\n");
 }
@@ -115,15 +148,17 @@ void render_month(int days, int counter, int month, Today today) {
     printf("%s\n", months[month]);
     printf("MN TS WD TH FR ST SN\n");
     if (today.month == month) {
+        make_indent(counter);
         render_numbers(days, counter, today.day);
     } else {
+        make_indent(counter);
         render_numbers(days, counter, -1);
     }
 
 }
 
 
-void render_months(Today today) {
+void render_months(Today today, int* wday_array) {
     bool IsLeapYear;
     if (today.year % 4 == 0) {
         IsLeapYear = true;
@@ -132,7 +167,7 @@ void render_months(Today today) {
     }
 
     for (int i = 0; i < 12; i++) {
-        int counter = 1;
+        int counter = wday_array[i]; // counter is actually just first wday of month i'm sorry about that
         switch((Months)i) {
             case JANUARY:
             case MARCH:
@@ -169,9 +204,6 @@ void render_months(Today today) {
 
 int main() {
     Today myday = get_today();
-    render_months(myday);
-
-    printf("TODAY:\n");
-    printf("Day of month: %d. Month: %s Year: %d\n", myday.day, months[myday.month], myday.year);
-    return 0;  
+    int *myday_wdays = get_first_wday_of_months(myday.year);
+    render_months(myday, myday_wdays);
 }
